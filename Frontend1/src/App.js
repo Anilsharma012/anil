@@ -521,6 +521,8 @@ const AppContent = () => {
           <Route path="reports" element={<StudentReports />} />
           <Route path="course/:courseId" element={<CourseViewer />} />
           <Route path="course-content/:courseId" element={<StudentCourseContentManager />} />
+          <Route path="continue-learning" element={React.createElement(require('./pages/Student/ContinueLearning/ContinueLearning').default, {})} />
+          <Route path="live-class" element={React.createElement(require('./pages/Student/LiveClasses/LiveClassPage').default, {})} />
           <Route path="live-classes" element={<StudentLiveClasses />} />
           <Route path="purchase-history" element={<PurchaseHistory />} />
         </Route>
