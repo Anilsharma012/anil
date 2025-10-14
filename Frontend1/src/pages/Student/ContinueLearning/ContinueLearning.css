@@ -3,13 +3,15 @@
 .cl-hero{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 16px;max-width:1100px;margin:0 auto}
 .cl-meta-row{display:flex;align-items:center;gap:8px;color:#64748b}
 .cl-instructor{font-weight:500}
-.cl-dot{width:4px;height:4px;background:#cbd5e1;border-radius:50%}
+.cl-dot{width:4px;height:4px;background:#cbd5e1;border-radius:50%;display:inline-block}
 .cl-rating{color:#f59e0b}
 .cl-progress-badge{background:#e0e7ff;color:#1e40af;border-radius:999px;padding:6px 10px;font-weight:600;min-width:48px;text-align:center}
 .cl-primary-btn{background:#2563EB;color:#fff;border-radius:8px;padding:10px 14px;display:inline-block;text-decoration:none;font-weight:600}
 .cl-primary-btn:hover{background:#1e4ed8}
+.cl-primary-btn:focus-visible{outline:2px solid #2563EB;outline-offset:2px;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
 .cl-secondary-btn{background:#f1f5f9;color:#0f172a;border-radius:8px;padding:10px 12px;text-decoration:none;display:inline-block}
 .cl-secondary-btn:hover{background:#e2e8f0}
+.cl-secondary-btn:focus-visible{outline:2px solid #2563EB;outline-offset:2px;box-shadow:0 0 0 3px rgba(37,99,235,.2)}
 
 .cl-layout{display:grid;grid-template-columns:1fr;gap:16px;max-width:1100px;padding:0 16px;margin:0 auto}
 @media(min-width:992px){.cl-layout{grid-template-columns:7fr 3fr}}
@@ -34,6 +36,8 @@
 
 .cl-accordion{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .cl-acc-item{border-radius:10px;background:#f8fafc}
+.cl-acc-item.is-active .cl-acc-summary{background:#eef2ff}
+.cl-acc-item.is-active .cl-status{background:#dbeafe;color:#1e40af}
 .cl-acc-summary{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
 .cl-acc-title{font-weight:600}
 .cl-acc-meta{display:flex;align-items:center;gap:10px;color:#64748b}
@@ -55,7 +59,7 @@
 
 .cl-sidebar{position:relative}
 .cl-sticky{position:sticky;top:16px}
-.cl-sidebar-section+ .cl-sidebar-section{margin-top:16px}
+.cl-sidebar-section+.cl-sidebar-section{margin-top:16px}
 .cl-subtitle{font-size:16px;margin:0 0 8px}
 .cl-next-title{font-weight:600}
 .cl-next-muted{color:#64748b}
