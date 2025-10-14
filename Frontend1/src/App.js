@@ -111,6 +111,8 @@ import AdminLiveClasses from "./pages/mainAdmin/LiveClasses/AdminLiveClasses";
 import BatchManagement from "./pages/mainAdmin/BatchManagement/BatchManagement";
 import TeacherLiveClasses from "./pages/MainSubAdmin/LiveClasses/TeacherLiveClasses";
 import StudentLiveClasses from "./pages/Student/LiveClasses/StudentLiveClasses";
+import ContinueLearning from "./pages/Student/ContinueLearning/ContinueLearning";
+import LiveClassPage from "./pages/Student/LiveClasses/LiveClassPage";
 import PurchaseHistory from "./pages/Student/PurchaseHistory/PurchaseHistory";
 
 import DevNotificationComp from "./components/DevNotification/DevNotification"; // (alias safe)
@@ -521,8 +523,8 @@ const AppContent = () => {
           <Route path="reports" element={<StudentReports />} />
           <Route path="course/:courseId" element={<CourseViewer />} />
           <Route path="course-content/:courseId" element={<StudentCourseContentManager />} />
-          <Route path="continue-learning" element={React.createElement(require('./pages/Student/ContinueLearning/ContinueLearning').default, {})} />
-          <Route path="live-class" element={React.createElement(require('./pages/Student/LiveClasses/LiveClassPage').default, {})} />
+          <Route path="continue-learning" element={<ContinueLearning />} />
+          <Route path="live-class" element={<LiveClassPage />} />
           <Route path="live-classes" element={<StudentLiveClasses />} />
           <Route path="purchase-history" element={<PurchaseHistory />} />
         </Route>
