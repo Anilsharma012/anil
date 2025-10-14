@@ -190,9 +190,7 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
               <h3 className="cl-subtitle">Next Lesson</h3>
               <div className="cl-next-title" data-field="lesson.title">{lesson.title || "Lesson Title"}</div>
               <div className="cl-next-muted" data-field="lesson.duration">{lesson.duration || "--"}</div>
-              <div className="cl-progress-track" aria-label="Next lesson progress">
-                <div className="cl-progress-fill" style={{ width: "40%" }} />
-              </div>
+              <progress className="cl-progress" value={40} max={100} aria-label="Next lesson progress" />
             </div>
 
             <div className="cl-sidebar-section">
