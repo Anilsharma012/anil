@@ -9,7 +9,6 @@ const getVideoEmbed = (url) => {
     const u = new URL(url);
     const href = u.href;
     if (href.includes("youtube.com") || href.includes("youtu.be")) {
-      // Normalize id
       let id = "";
       if (u.hostname.includes("youtu.be")) id = u.pathname.replace("/", "");
       else if (u.searchParams.get("v")) id = u.searchParams.get("v");
@@ -43,17 +42,17 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
   const course = courseProp || {};
   const lesson = lessonProp || {};
   const progress = clamp(course.progress);
+  const lessonProgress = clamp(lesson.progress);
   const [tab, setTab] = useState("overview");
   const video = useMemo(() => getVideoEmbed(course.videoUrl), [course.videoUrl]);
 
   return (
     <main className="cl-page" aria-labelledby="cl-hero-title">
-      {/* Hero */}
       <section className="cl-hero" data-layer="Hero">
         <div className="cl-hero-left">
-          <h1 id="cl-hero-title" className="cl-title" data-field="course.title">{course.title || "Course Title"}</h1>
+          <h1 id="cl-hero-title" className="cl-title" data-field="course.title">{course.title}</h1>
           <div className="cl-meta-row">
-            <span className="cl-instructor" data-field="course.instructor">{course.instructor || "Instructor"}</span>
+            <span className="cl-instructor" data-field="course.instructor">{course.instructor}</span>
             <span aria-hidden className="cl-dot" />
             <span className="cl-rating" aria-label="Course rating">★★★★★</span>
           </div>
@@ -64,10 +63,8 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
         </div>
       </section>
 
-      {/* Layout */}
       <section className="cl-layout" data-layer="Main Layout">
         <div className="cl-main">
-          {/* Video */}
           <div className="cl-video" data-layer="Video">
             {video.type === "none" || !video.src ? (
               <div className="cl-video-placeholder" role="status">No video available</div>
@@ -86,17 +83,15 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
             )}
           </div>
 
-          {/* Lesson header */}
           <header className="cl-lesson-header" data-layer="Lesson Header">
-            <h2 className="cl-lesson-title" data-field="lesson.title">{lesson.title || "Lesson Title"}</h2>
-            <p className="cl-lesson-desc" data-field="lesson.description">{lesson.description || "Lesson description will appear here."}</p>
+            <h2 className="cl-lesson-title" data-field="lesson.title">{lesson.title}</h2>
+            <p className="cl-lesson-desc" data-field="lesson.description">{lesson.description}</p>
             <div className="cl-lesson-nav">
               <a className="cl-secondary-btn" href="#" aria-label="Previous lesson">Prev Lesson</a>
               <a className="cl-secondary-btn" href="#" aria-label="Next lesson">Next Lesson</a>
             </div>
           </header>
 
-          {/* Tabs */}
           <div className="cl-tabs" role="tablist" aria-label="Course sections" data-layer="Tabs">
             <TabButton id="overview" label="Overview" active={tab === "overview"} onClick={() => setTab("overview")} />
             <TabButton id="syllabus" label="Syllabus" active={tab === "syllabus"} onClick={() => setTab("syllabus")} />
@@ -111,9 +106,7 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
             hidden={tab !== "overview"}
             className="cl-card"
             data-layer="Overview"
-          >
-            <p className="cl-body">Keep learning—track your progress and resume anytime.</p>
-          </section>
+          />
 
           <section
             id="tab-panel-syllabus"
@@ -124,25 +117,28 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
             data-layer="Syllabus"
           >
             <ul className="cl-accordion" aria-label="Syllabus list">
-              {(course.syllabus || []).map((item, idx) => (
-                <li key={idx} className={`cl-acc-item ${item?.status === "completed" ? "is-completed" : item?.status === "locked" ? "is-locked" : ""}`}>
-                  <details open={false} className="cl-acc-details">
-                    <summary className="cl-acc-summary">
-                      <span className="cl-acc-title" data-field={`course.syllabus[${idx}].title`}>{item?.title || "Lesson"}</span>
-                      <span className="cl-acc-meta">
-                        <span className="cl-acc-duration" data-field={`course.syllabus[${idx}].duration`}>{item?.duration || "--"}</span>
-                        <span className={`cl-status ${item?.status || ""}`} data-field={`course.syllabus[${idx}].status`}>{item?.status || "unlocked"}</span>
-                      </span>
-                    </summary>
-                    <div className="cl-acc-body">
-                      <a href="#" className="cl-secondary-btn">Open Lesson</a>
-                    </div>
-                  </details>
-                </li>
-              ))}
-              {(!course.syllabus || course.syllabus.length === 0) && (
-                <li className="cl-acc-empty">No syllabus added yet.</li>
-              )}
+              {(course.syllabus || []).map((item, idx) => {
+                const isActive = (item?.status === "active" || item?.status === "current" || (lesson.title && item?.title === lesson.title));
+                return (
+                  <li
+                    key={idx}
+                    className={`cl-acc-item ${isActive ? "is-active" : ""} ${item?.status === "completed" ? "is-completed" : item?.status === "locked" ? "is-locked" : ""}`.trim()}
+                  >
+                    <details className="cl-acc-details">
+                      <summary className="cl-acc-summary" aria-current={isActive ? "true" : undefined}>
+                        <span className="cl-acc-title" data-field={`course.syllabus[${idx}].title`}>{item?.title}</span>
+                        <span className="cl-acc-meta">
+                          <span className="cl-acc-duration" data-field={`course.syllabus[${idx}].duration`}>{item?.duration}</span>
+                          <span className={`cl-status ${item?.status || ""}`} data-field={`course.syllabus[${idx}].status`}>{item?.status}</span>
+                        </span>
+                      </summary>
+                      <div className="cl-acc-body">
+                        <a href="#" className="cl-secondary-btn">Open Lesson</a>
+                      </div>
+                    </details>
+                  </li>
+                );
+              })}
             </ul>
           </section>
 
@@ -159,11 +155,10 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
                 <li key={idx} className="cl-resource-item">
                   <span className="cl-resource-icon" aria-hidden>📄</span>
                   <a href={r?.url || "#"} target="_blank" rel="noreferrer" className="cl-resource-link" data-field={`course.resources[${idx}].url`}>
-                    <span data-field={`course.resources[${idx}].label`}>{r?.label || "Resource"}</span>
+                    <span data-field={`course.resources[${idx}].label`}>{r?.label}</span>
                   </a>
                 </li>
               ))}
-              {(!course.resources || course.resources.length === 0) && <li className="cl-acc-empty">No resources yet.</li>}
             </ul>
           </section>
 
@@ -176,21 +171,20 @@ const ContinueLearning = ({ course: courseProp, lesson: lessonProp }) => {
             data-layer="Notes"
           >
             <label htmlFor="note" className="cl-label">Notes</label>
-            <textarea id="note" className="cl-textarea" placeholder="Write your note here…" rows={6} />
+            <textarea id="note" className="cl-textarea" rows={6} />
             <div className="cl-note-actions">
               <button className="cl-primary-btn" type="button">Save Note</button>
             </div>
           </section>
         </div>
 
-        {/* Sidebar */}
         <aside className="cl-sidebar" data-layer="Sidebar">
           <div className="cl-card cl-sticky">
             <div className="cl-sidebar-section">
               <h3 className="cl-subtitle">Next Lesson</h3>
-              <div className="cl-next-title" data-field="lesson.title">{lesson.title || "Lesson Title"}</div>
-              <div className="cl-next-muted" data-field="lesson.duration">{lesson.duration || "--"}</div>
-              <progress className="cl-progress" value={40} max={100} aria-label="Next lesson progress" />
+              <div className="cl-next-title" data-field="lesson.title">{lesson.title}</div>
+              <div className="cl-next-muted" data-field="lesson.duration">{lesson.duration}</div>
+              <progress className="cl-progress" value={lessonProgress} max={100} aria-label="Next lesson progress" />
             </div>
 
             <div className="cl-sidebar-section">
