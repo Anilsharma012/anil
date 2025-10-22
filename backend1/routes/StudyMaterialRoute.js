@@ -35,6 +35,7 @@ const optionalAuth = (req, res, next) => {
 
 router.get('/student', optionalAuth, getStudentStudyMaterials);
 router.get('/download/:id', authMiddleware, downloadStudyMaterial);
+router.get('/view/:id', authMiddleware, viewStudyMaterial);
 router.get('/student/:id', optionalAuth, getStudyMaterialById);
 
 // Admin routes (protected by auth and admin permission)
