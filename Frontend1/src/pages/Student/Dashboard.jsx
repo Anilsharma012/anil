@@ -795,22 +795,11 @@ const loadMyCourses = async () => {
     setMaterialViewerLoading(true);
 
     try {
-      const response = await fetch(`/api/study-materials/download/${material._id}`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
-        }
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        setMaterialPdfUrl(url);
-      } else {
-        console.error('Failed to load material');
-        alert('Failed to load material. Please try again.');
-      }
+      // Use view endpoint for inline display (not download)
+      const viewUrl = `/api/study-materials/view/${material._id}`;
+      setMaterialPdfUrl(viewUrl);
     } catch (error) {
-      console.error('Error loading material:', error);
+      console.error('Error preparing material:', error);
       alert('Error loading material. Please try again.');
     } finally {
       setMaterialViewerLoading(false);
@@ -819,9 +808,6 @@ const loadMyCourses = async () => {
 
   const closeMaterialViewer = () => {
     setMaterialViewerOpen(false);
-    if (materialPdfUrl) {
-      window.URL.revokeObjectURL(materialPdfUrl);
-    }
     setMaterialPdfUrl(null);
     setSelectedMaterial(null);
   };
