@@ -29,7 +29,6 @@ import {
   FiTrendingUp,
   FiCheckCircle,
   FiEye,
-  FiShare2,
   FiFileText
 } from 'react-icons/fi';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
@@ -183,7 +182,10 @@ const StudentDashboard = () => {
     subject: 'All Subjects',
     type: 'All Types'
   });
-  const [downloading, setDownloading] = useState(null);
+  const [materialViewerOpen, setMaterialViewerOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [materialViewerLoading, setMaterialViewerLoading] = useState(false);
+  const [materialPdfUrl, setMaterialPdfUrl] = useState(null);
 
   // Announcements state
   const [announcements, setAnnouncements] = useState([]);
@@ -776,65 +778,50 @@ const loadMyCourses = async () => {
     }
   };
 
-  // Handle material download
-  const handleDownloadMaterial = async (materialId, materialTitle) => {
+  // Handle material view
+  const handleViewMaterial = async (material) => {
     const authToken = localStorage.getItem('authToken');
 
     if (!authToken || authToken === 'null' || authToken === 'undefined') {
-      alert('Please login to download study materials!');
+      alert('Please login to view study materials!');
       navigate('/login');
       return;
     }
 
-    setDownloading(materialId);
+    setSelectedMaterial(material);
+    setMaterialViewerOpen(true);
+    setMaterialViewerLoading(true);
 
     try {
-      const response = await fetch(`/api/study-materials/download/${materialId}`, {
+      // Fetch the PDF with auth headers and convert to blob URL for iframe
+      const response = await fetch(`/api/study-materials/view/${material._id}`, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
       });
 
       if (response.ok) {
-        // Get the file blob
         const blob = await response.blob();
-
-        // Create download link
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = materialTitle;
-        document.body.appendChild(link);
-        link.click();
-
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(link);
-
-        console.log('✅ Material downloaded successfully');
-
-        // Refresh materials to update download count
-        loadStudyMaterials();
+        setMaterialPdfUrl(url);
       } else {
-        let errorMessage = 'Failed to download material';
-        try {
-          // Clone response to prevent body stream issues
-          const responseClone = response.clone();
-          const errorData = await responseClone.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (parseError) {
-          // If JSON parsing fails, use default message
-          console.warn('Could not parse error response:', parseError);
-        }
-        alert(errorMessage);
-        console.error('❌ Download failed:', errorMessage);
+        console.error('Failed to load material');
+        alert('Failed to load material. Please try again.');
+        setMaterialViewerOpen(false);
       }
     } catch (error) {
-      console.error('❌ Error downloading material:', error);
-      alert('Failed to download material. Please try again.');
+      console.error('Error loading material:', error);
+      alert('Error loading material. Please try again.');
+      setMaterialViewerOpen(false);
     } finally {
-      setDownloading(null);
+      setMaterialViewerLoading(false);
     }
+  };
+
+  const closeMaterialViewer = () => {
+    setMaterialViewerOpen(false);
+    setMaterialPdfUrl(null);
+    setSelectedMaterial(null);
   };
 
   // Load announcements
@@ -1749,19 +1736,11 @@ const loadMyCourses = async () => {
               </div>
               <div className="material-actions">
                 <button
-                  className="download-btn"
-                  onClick={() => handleDownloadMaterial(material._id, material.title)}
-                  disabled={downloading === material._id}
-                  title="Download Material"
+                  className="view-btn"
+                  onClick={() => handleViewMaterial(material)}
+                  title="View Material"
                 >
-                  {downloading === material._id ? (
-                    <div className="download-spinner"></div>
-                  ) : (
-                    <FiDownload />
-                  )}
-                </button>
-                <button className="share-btn" title="Share Material">
-                  <FiShare2 />
+                  <FiEye /> View
                 </button>
               </div>
             </div>
@@ -2153,6 +2132,95 @@ const loadMyCourses = async () => {
             <div className="preview-actions">
               <button className="download-btn" onClick={downloadOverviewPdf} disabled={previewLoading}>
                 <FiDownload /> Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Material Viewer Modal */}
+      {materialViewerOpen && (
+        <div className="material-viewer-overlay" role="dialog" aria-modal="true" onClick={closeMaterialViewer}>
+          <div className="material-viewer-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="material-viewer-header">
+              <h3 className="material-viewer-title">{selectedMaterial?.title}</h3>
+              <button className="material-viewer-close" onClick={closeMaterialViewer} aria-label="Close">
+                <FiX />
+              </button>
+            </div>
+            <div className="material-viewer-body">
+              {materialViewerLoading ? (
+                <div className="material-viewer-loading">Loading material...</div>
+              ) : materialPdfUrl ? (
+                <div className="material-viewer-content">
+                  <div className="material-details">
+                    <div className="detail-section">
+                      <label>Type:</label>
+                      <span>{selectedMaterial?.type}</span>
+                    </div>
+                    <div className="detail-section">
+                      <label>Subject:</label>
+                      <span>{selectedMaterial?.subject}</span>
+                    </div>
+                    <div className="detail-section">
+                      <label>File Size:</label>
+                      <span>{selectedMaterial?.fileSize}</span>
+                    </div>
+                    <div className="detail-section">
+                      <label>Downloads:</label>
+                      <span>{selectedMaterial?.downloadCount}</span>
+                    </div>
+                    {selectedMaterial?.description && (
+                      <div className="detail-section full-width">
+                        <label>Description:</label>
+                        <p>{selectedMaterial.description}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="material-pdf-container">
+                    <iframe
+                      src={materialPdfUrl}
+                      title="Material Preview"
+                      className="material-pdf-viewer"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="material-viewer-error">Failed to load material. Please try again.</div>
+              )}
+            </div>
+            <div className="material-viewer-actions">
+              <button
+                className="download-btn"
+                onClick={async () => {
+                  const authToken = localStorage.getItem('authToken');
+                  try {
+                    const response = await fetch(`/api/study-materials/download/${selectedMaterial._id}`, {
+                      headers: {
+                        'Authorization': `Bearer ${authToken}`
+                      }
+                    });
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = selectedMaterial?.title || 'material.pdf';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(url);
+                    }
+                  } catch (error) {
+                    console.error('Download error:', error);
+                    alert('Failed to download file');
+                  }
+                }}
+              >
+                <FiDownload /> Download
+              </button>
+              <button className="close-btn" onClick={closeMaterialViewer}>
+                Close
               </button>
             </div>
           </div>

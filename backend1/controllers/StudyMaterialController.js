@@ -211,14 +211,68 @@ const getStudentStudyMaterials = async (req, res) => {
   }
 };
 
+// View study material (inline display, not download)
+const viewStudyMaterial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('👁️ View study material request for ID:', id);
+
+    const material = await StudyMaterial.findById(id);
+
+    if (!material) {
+      return res.status(404).json({
+        success: false,
+        message: 'Study material not found'
+      });
+    }
+
+    if (!material.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'This study material is no longer available'
+      });
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(material.filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'File not found on server'
+      });
+    }
+
+    // Increment download count for view tracking
+    await material.incrementDownload();
+
+    console.log('✅ Serving file for inline viewing:', material.fileName);
+
+    // Set headers for inline display (not download)
+    res.setHeader('Content-Disposition', `inline; filename="${material.fileName}"`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+    // Stream the file
+    const fileStream = fs.createReadStream(material.filePath);
+    fileStream.pipe(res);
+
+  } catch (error) {
+    console.error('❌ Error viewing study material:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error viewing study material',
+      error: error.message
+    });
+  }
+};
+
 // Download study material
 const downloadStudyMaterial = async (req, res) => {
   try {
     const { id } = req.params;
     console.log('📥 Download study material request for ID:', id);
-    
+
     const material = await StudyMaterial.findById(id);
-    
+
     if (!material) {
       return res.status(404).json({
         success: false,
@@ -243,13 +297,13 @@ const downloadStudyMaterial = async (req, res) => {
 
     // Increment download count
     await material.incrementDownload();
-    
+
     console.log('✅ Serving file for download:', material.fileName);
-    
+
     // Set headers for file download
     res.setHeader('Content-Disposition', `attachment; filename="${material.fileName}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
-    
+
     // Stream the file
     const fileStream = fs.createReadStream(material.filePath);
     fileStream.pipe(res);
@@ -389,6 +443,7 @@ module.exports = {
   getAllStudyMaterials,
   getStudentStudyMaterials,
   downloadStudyMaterial,
+  viewStudyMaterial,
   updateStudyMaterial,
   deleteStudyMaterial,
   getStudyMaterialById
