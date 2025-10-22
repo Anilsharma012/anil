@@ -182,7 +182,6 @@ const StudentDashboard = () => {
     subject: 'All Subjects',
     type: 'All Types'
   });
-  const [downloading, setDownloading] = useState(null);
   const [materialViewerOpen, setMaterialViewerOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [materialViewerLoading, setMaterialViewerLoading] = useState(false);
@@ -487,7 +486,7 @@ const loadMyCourses = async () => {
         setReceipts([]);
       }
     } catch (error) {
-      console.error('❌ Error loading receipts:', error);
+      console.error('�� Error loading receipts:', error);
       setReceipts([]);
     } finally {
       setReceiptsLoading(false);
