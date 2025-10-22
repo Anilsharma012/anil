@@ -486,7 +486,7 @@ const loadMyCourses = async () => {
         setReceipts([]);
       }
     } catch (error) {
-      console.error('�� Error loading receipts:', error);
+      console.error('❌ Error loading receipts:', error);
       setReceipts([]);
     } finally {
       setReceiptsLoading(false);
@@ -793,12 +793,26 @@ const loadMyCourses = async () => {
     setMaterialViewerLoading(true);
 
     try {
-      // Use view endpoint for inline display (not download)
-      const viewUrl = `/api/study-materials/view/${material._id}`;
-      setMaterialPdfUrl(viewUrl);
+      // Fetch the PDF with auth headers and convert to blob URL for iframe
+      const response = await fetch(`/api/study-materials/view/${material._id}`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        setMaterialPdfUrl(url);
+      } else {
+        console.error('Failed to load material');
+        alert('Failed to load material. Please try again.');
+        setMaterialViewerOpen(false);
+      }
     } catch (error) {
-      console.error('Error preparing material:', error);
+      console.error('Error loading material:', error);
       alert('Error loading material. Please try again.');
+      setMaterialViewerOpen(false);
     } finally {
       setMaterialViewerLoading(false);
     }
