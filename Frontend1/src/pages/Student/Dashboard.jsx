@@ -2180,13 +2180,29 @@ const loadMyCourses = async () => {
             <div className="material-viewer-actions">
               <button
                 className="download-btn"
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = materialPdfUrl;
-                  link.download = selectedMaterial?.title || 'material';
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
+                onClick={async () => {
+                  const authToken = localStorage.getItem('authToken');
+                  try {
+                    const response = await fetch(`/api/study-materials/download/${selectedMaterial._id}`, {
+                      headers: {
+                        'Authorization': `Bearer ${authToken}`
+                      }
+                    });
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = selectedMaterial?.title || 'material.pdf';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(url);
+                    }
+                  } catch (error) {
+                    console.error('Download error:', error);
+                    alert('Failed to download file');
+                  }
                 }}
               >
                 <FiDownload /> Download
