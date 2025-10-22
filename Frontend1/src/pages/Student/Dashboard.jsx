@@ -29,7 +29,6 @@ import {
   FiTrendingUp,
   FiCheckCircle,
   FiEye,
-  FiShare2,
   FiFileText
 } from 'react-icons/fi';
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
