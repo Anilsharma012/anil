@@ -443,6 +443,7 @@ module.exports = {
   getAllStudyMaterials,
   getStudentStudyMaterials,
   downloadStudyMaterial,
+  viewStudyMaterial,
   updateStudyMaterial,
   deleteStudyMaterial,
   getStudyMaterialById
