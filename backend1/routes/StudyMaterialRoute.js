@@ -6,6 +6,7 @@ const {
   getAllStudyMaterials,
   getStudentStudyMaterials,
   downloadStudyMaterial,
+  viewStudyMaterial,
   updateStudyMaterial,
   deleteStudyMaterial,
   getStudyMaterialById
