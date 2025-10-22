@@ -184,6 +184,10 @@ const StudentDashboard = () => {
     type: 'All Types'
   });
   const [downloading, setDownloading] = useState(null);
+  const [materialViewerOpen, setMaterialViewerOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [materialViewerLoading, setMaterialViewerLoading] = useState(false);
+  const [materialPdfUrl, setMaterialPdfUrl] = useState(null);
 
   // Announcements state
   const [announcements, setAnnouncements] = useState([]);
@@ -776,65 +780,50 @@ const loadMyCourses = async () => {
     }
   };
 
-  // Handle material download
-  const handleDownloadMaterial = async (materialId, materialTitle) => {
+  // Handle material view
+  const handleViewMaterial = async (material) => {
     const authToken = localStorage.getItem('authToken');
 
     if (!authToken || authToken === 'null' || authToken === 'undefined') {
-      alert('Please login to download study materials!');
+      alert('Please login to view study materials!');
       navigate('/login');
       return;
     }
 
-    setDownloading(materialId);
+    setSelectedMaterial(material);
+    setMaterialViewerOpen(true);
+    setMaterialViewerLoading(true);
 
     try {
-      const response = await fetch(`/api/study-materials/download/${materialId}`, {
+      const response = await fetch(`/api/study-materials/download/${material._id}`, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
       });
 
       if (response.ok) {
-        // Get the file blob
         const blob = await response.blob();
-
-        // Create download link
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = materialTitle;
-        document.body.appendChild(link);
-        link.click();
-
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(link);
-
-        console.log('✅ Material downloaded successfully');
-
-        // Refresh materials to update download count
-        loadStudyMaterials();
+        setMaterialPdfUrl(url);
       } else {
-        let errorMessage = 'Failed to download material';
-        try {
-          // Clone response to prevent body stream issues
-          const responseClone = response.clone();
-          const errorData = await responseClone.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (parseError) {
-          // If JSON parsing fails, use default message
-          console.warn('Could not parse error response:', parseError);
-        }
-        alert(errorMessage);
-        console.error('❌ Download failed:', errorMessage);
+        console.error('Failed to load material');
+        alert('Failed to load material. Please try again.');
       }
     } catch (error) {
-      console.error('❌ Error downloading material:', error);
-      alert('Failed to download material. Please try again.');
+      console.error('Error loading material:', error);
+      alert('Error loading material. Please try again.');
     } finally {
-      setDownloading(null);
+      setMaterialViewerLoading(false);
     }
+  };
+
+  const closeMaterialViewer = () => {
+    setMaterialViewerOpen(false);
+    if (materialPdfUrl) {
+      window.URL.revokeObjectURL(materialPdfUrl);
+    }
+    setMaterialPdfUrl(null);
+    setSelectedMaterial(null);
   };
 
   // Load announcements
