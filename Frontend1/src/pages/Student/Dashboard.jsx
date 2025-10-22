@@ -2140,6 +2140,79 @@ const loadMyCourses = async () => {
         </div>
       )}
 
+      {/* Material Viewer Modal */}
+      {materialViewerOpen && (
+        <div className="material-viewer-overlay" role="dialog" aria-modal="true" onClick={closeMaterialViewer}>
+          <div className="material-viewer-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="material-viewer-header">
+              <h3 className="material-viewer-title">{selectedMaterial?.title}</h3>
+              <button className="material-viewer-close" onClick={closeMaterialViewer} aria-label="Close">
+                <FiX />
+              </button>
+            </div>
+            <div className="material-viewer-body">
+              {materialViewerLoading ? (
+                <div className="material-viewer-loading">Loading material...</div>
+              ) : materialPdfUrl ? (
+                <div className="material-viewer-content">
+                  <div className="material-details">
+                    <div className="detail-section">
+                      <label>Type:</label>
+                      <span>{selectedMaterial?.type}</span>
+                    </div>
+                    <div className="detail-section">
+                      <label>Subject:</label>
+                      <span>{selectedMaterial?.subject}</span>
+                    </div>
+                    <div className="detail-section">
+                      <label>File Size:</label>
+                      <span>{selectedMaterial?.fileSize}</span>
+                    </div>
+                    <div className="detail-section">
+                      <label>Downloads:</label>
+                      <span>{selectedMaterial?.downloadCount}</span>
+                    </div>
+                    {selectedMaterial?.description && (
+                      <div className="detail-section full-width">
+                        <label>Description:</label>
+                        <p>{selectedMaterial.description}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="material-pdf-container">
+                    <iframe
+                      src={materialPdfUrl}
+                      title="Material Preview"
+                      className="material-pdf-viewer"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="material-viewer-error">Failed to load material. Please try again.</div>
+              )}
+            </div>
+            <div className="material-viewer-actions">
+              <button
+                className="download-btn"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = materialPdfUrl;
+                  link.download = selectedMaterial?.title || 'material';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              >
+                <FiDownload /> Download
+              </button>
+              <button className="close-btn" onClick={closeMaterialViewer}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Overlay */}
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)}></div>}
     </div>
