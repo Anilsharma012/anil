@@ -1738,19 +1738,11 @@ const loadMyCourses = async () => {
               </div>
               <div className="material-actions">
                 <button
-                  className="download-btn"
-                  onClick={() => handleDownloadMaterial(material._id, material.title)}
-                  disabled={downloading === material._id}
-                  title="Download Material"
+                  className="view-btn"
+                  onClick={() => handleViewMaterial(material)}
+                  title="View Material"
                 >
-                  {downloading === material._id ? (
-                    <div className="download-spinner"></div>
-                  ) : (
-                    <FiDownload />
-                  )}
-                </button>
-                <button className="share-btn" title="Share Material">
-                  <FiShare2 />
+                  <FiEye /> View
                 </button>
               </div>
             </div>
